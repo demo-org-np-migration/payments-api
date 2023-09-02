@@ -10,7 +10,8 @@ spring:
     password: ${DB_PASSWORD:cauri}
   jpa:
     hibernate:
-      ddl-auto: validate
+      # Flyway es dueño del esquema (db/migration); Hibernate no valida ni genera DDL.
+      ddl-auto: none
     open-in-view: false
   flyway:
     enabled: true

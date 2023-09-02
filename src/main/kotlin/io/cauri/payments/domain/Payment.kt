@@ -26,7 +26,7 @@ class Payment(
     @Column(nullable = false)
     val amount: BigDecimal,
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "char(3)")
     val currency: String,
 
     @Column(nullable = false)
