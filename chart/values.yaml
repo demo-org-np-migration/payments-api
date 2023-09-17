@@ -1,0 +1,64 @@
+# Defaults de staging. Los values de staging/prod "de verdad" viven en el repo gitops
+# (apps/payments-api/values-<env>.yaml); build.yml bumpea image.tag ahí en cada push a main
+# (y values-prod.yaml al taggear v*). Este archivo es lo que Argo CD usa como base del chart.
+
+image:
+  repository: ghcr.io/demo-org-np-migration/payments-api
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+probes:
+  path: /actuator/health
+  initialDelaySeconds: 20
+  periodSeconds: 10
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  path: /actuator/prometheus
+
+# Variables de entorno no sensibles (las convenciones internas de API, #2 y spec payments-api). Van a un ConfigMap
+# y se montan con envFrom. Lo sensible (credenciales de Postgres y el client secret de Keycloak)
+# NUNCA entra acá: sale de los Secrets `postgres-credentials` y `keycloak-client-payments-api`.
+env:
+  SERVICE_NAME: payments-api
+  ENV: staging
+  PORT: "8080"
+  LOG_LEVEL: INFO
+  DB_HOST: postgres.staging.svc
+  DB_NAME: payments
+  KEYCLOAK_ISSUER: http://keycloak.platform.svc:8080/realms/cauri-staging
+  KEYCLOAK_CLIENT_ID: payments-api
+  KAFKA_BOOTSTRAP: kafka.platform.svc:9092
+  KAFKA_TOPIC_PREFIX: staging.
+  LEDGER_CORE_URL: http://ledger-core:8080
+  FRAUD_SCORING_URL: http://fraud-scoring:8080
+  JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70"
+
+secrets:
+  postgres:
+    name: postgres-credentials
+    usernameKey: username
+    passwordKey: password
+  keycloak:
+    name: keycloak-client-payments-api
+    clientSecretKey: client_secret
+
+podLabels: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
