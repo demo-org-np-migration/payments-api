@@ -1,5 +1,6 @@
 package io.cauri.payments.clients
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -10,6 +11,7 @@ data class ScoreRequest(
     @JvmField val payment_id: UUID,
     @JvmField val from_account: UUID,
     @JvmField val to_account: UUID,
+    @field:JsonSerialize(using = PlainDecimalSerializer::class)
     @JvmField val amount: BigDecimal,
     @JvmField val currency: String,
 )
