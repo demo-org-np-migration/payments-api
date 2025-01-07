@@ -109,4 +109,11 @@ class PaymentsControllerTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.id").value(id.toString()))
     }
+
+    @Test
+    fun `an id that is not a UUID returns the standard error envelope, not Spring's default body`() {
+        mockMvc.perform(get("/v1/payments/null/status").with(jwt()))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error.code").value("invalid_id"))
+    }
 }
