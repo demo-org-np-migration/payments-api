@@ -25,7 +25,8 @@ CREATE TABLE payments (
 CREATE INDEX idx_payments_from_account ON payments(from_account);
 CREATE INDEX idx_payments_to_account ON payments(to_account);
 
-CREATE TABLE settlements (
+-- IF NOT EXISTS: payments-worker también la crea si arranca primero (tiene su propia historia de Flyway)
+CREATE TABLE IF NOT EXISTS settlements (
     id           UUID PRIMARY KEY,
     payment_id   UUID NOT NULL UNIQUE REFERENCES payments(id),
     settled_at   TIMESTAMPTZ NOT NULL,
