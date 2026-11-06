@@ -68,11 +68,17 @@ jobs:
             echo "promoted=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Las dos arquitecturas: los nodos del cluster son arm64 y los runners de GitHub amd64. Sin esto, la imagen no
+      # tiene la plataforma del nodo y el pod queda en ImagePullBackOff ("no match for platform in manifest").
+      - uses: docker/setup-qemu-action@v3
+        if: steps.promote.outputs.promoted != 'true'
+
       - name: Build and push
         id: build
         if: steps.promote.outputs.promoted != 'true'
         uses: docker/build-push-action@v6
         with:
+          platforms: linux/amd64,linux/arm64
           context: .
           push: true
           tags: |
